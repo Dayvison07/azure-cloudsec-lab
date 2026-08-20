@@ -1,38 +1,3 @@
-terraform {
-  required_version = ">= 1.8.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.90"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
-
-terraform {
-  required_version = ">= 1.8.0"
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.90"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
-  }
-}
-
-provider "azurerm" {
-  features {}
-}
 
 resource "azurerm_resource_group" "state_rg" {
   name     = "rg-terraform-state"
@@ -59,7 +24,7 @@ resource "azurerm_storage_account" "state_sa" {
   account_replication_type = "GRS"
   min_tls_version          = "TLS1_2"
 
-  shared_access_key_enabled       = false
+  shared_access_key_enabled       = true
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = true
 
