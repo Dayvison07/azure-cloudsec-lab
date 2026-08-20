@@ -62,6 +62,12 @@ resource "azurerm_subnet_network_security_group_association" "frontend_assoc" {
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
+# NSG to Subnet Association (Endpoints)
+resource "azurerm_subnet_network_security_group_association" "endpoints_assoc" {
+  subnet_id                 = azurerm_subnet.endpoints.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
 # NSG Rule: Allow HTTPS Inbound
 resource "azurerm_network_security_rule" "allow_https" {
   name                        = "AllowHTTPSInbound"
