@@ -7,7 +7,9 @@ on:
     branches: [ "main" ]
 
 permissions:
+  id-token: write 
   contents: read
+  
 
 jobs:
   security-scan:
@@ -52,3 +54,36 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+ 
+  terraform-apply:
+    name: "Terraform Apply (OIDC)"
+    needs: [security-scan, terraform-build] # Só provisiona se passar na segurança e sintaxe
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: environments/dev
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.0"
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+    

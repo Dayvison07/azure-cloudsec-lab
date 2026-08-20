@@ -27,12 +27,20 @@ resource "azurerm_virtual_network" "vnet" {
   }
 }
 
-# 3. Frontend Subnet
+# 3. Subnets (Secure Segmentation)
 resource "azurerm_subnet" "frontend" {
   name                 = "snet-frontend"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = var.frontend_subnet_prefix
+}
+
+# Private Endpoints Subnet 
+resource "azurerm_subnet" "endpoints" {
+  name                 = "snet-endpoints"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [cidrsubnet(var.vnet_address_space[0], 4, 1)] 
 }
 
 # 4. Network Security Group (NSG)
@@ -101,16 +109,16 @@ resource "azurerm_log_analytics_workspace" "law" {
 
 # 6. Azure Key Vault (GRC & Compliance Hardening)
 resource "azurerm_key_vault" "kv" {
-  name                          = "kv-${lower(var.project_name)}-${var.environment}"
-  location                      = azurerm_resource_group.rg.location
-  resource_group_name           = azurerm_resource_group.rg.name
-  enabled_for_disk_encryption   = true
-  tenant_id                     = data.azurerm_client_config.current.tenant_id
-  soft_delete_retention_days    = 7
-  purge_protection_enabled      = true
-  enable_rbac_authorization     = true
+  name                        = substr("kv-${lower(var.project_name)}-${var.environment}", 0, 24)
+  location                    = azurerm_resource_group.rg.location
+  resource_group_name         = azurerm_resource_group.rg.name
+  enabled_for_disk_encryption = true
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = true
+  enable_rbac_authorization   = true
   public_network_access_enabled = false
-  sku_name                      = "standard"
+  sku_name                    = "standard"
 
   network_acls {
     bypass         = "AzureServices"
@@ -149,7 +157,7 @@ resource "azurerm_private_endpoint" "kv_pe" {
   name                = "pe-kv-${lower(var.project_name)}-${var.environment}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  subnet_id           = azurerm_subnet.frontend.id
+  subnet_id           = azurerm_subnet.endpoints.id # Apontado para a subnet dedicada de endpoints
 
   private_service_connection {
     name                           = "psc-kv-${var.environment}"
@@ -167,5 +175,21 @@ resource "azurerm_private_endpoint" "kv_pe" {
     Environment = var.environment
     Project     = var.project_name
     ManagedBy   = "Terraform"
+  }
+}
+
+# 9. Diagnostic Settings for Key Vault Audit
+resource "azurerm_monitor_diagnostic_setting" "kv_diagnostics" {
+  name                       = "ds-kv-to-loganalytics"
+  target_resource_id         = azurerm_key_vault.kv.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
+
+  enabled_log {
+    category = "AuditEvent"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
   }
 }
