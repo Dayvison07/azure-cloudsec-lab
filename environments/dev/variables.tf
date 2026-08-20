@@ -2,7 +2,7 @@ variable "location" {
   type        = string
   description = "Target Azure region for all deployed resources."
   # Standardized to lowercase canonical name to ensure consistent API evaluation
-  default     = "eastus"
+  default = "eastus"
 }
 
 variable "environment" {
@@ -15,7 +15,7 @@ variable "project_name" {
   type        = string
   description = "Project prefix identifier used for resource naming and tagging conventions."
   # Shortened identifier to guarantee Azure Key Vault 24-character naming limit compliance
-  default     = "zt-found"
+  default = "zt-found"
 }
 
 variable "vnet_address_space" {

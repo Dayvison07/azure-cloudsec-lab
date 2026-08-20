@@ -1,19 +1,19 @@
 terraform {
-    required_version = ">= 1.8.0"
-    required_providers {
-      azurerm = {
-        source = "hashicorp/azurerm"
-        version = "~> 3.90"
-      }
-      random = {
-        source = "hashicorp/random"
-        version = "~> 3.5"
-      }
+  required_version = ">= 1.8.0"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.90"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
+  }
 }
 
 provider "azurerm" {
-    features {}
+  features {}
 }
 
 terraform {
@@ -56,10 +56,10 @@ resource "azurerm_storage_account" "state_sa" {
   resource_group_name      = azurerm_resource_group.state_rg.name
   location                 = azurerm_resource_group.state_rg.location
   account_tier             = "Standard"
-  account_replication_type = "GRS" 
+  account_replication_type = "GRS"
   min_tls_version          = "TLS1_2"
 
-  shared_access_key_enabled       = false 
+  shared_access_key_enabled       = false
   allow_nested_items_to_be_public = false
   public_network_access_enabled   = true
 
