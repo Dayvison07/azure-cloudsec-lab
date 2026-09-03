@@ -199,3 +199,4 @@ resource "azurerm_monitor_diagnostic_setting" "kv_diagnostics" {
     enabled  = true
   }
 }
+

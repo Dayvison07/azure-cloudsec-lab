@@ -81,7 +81,7 @@ jobs:
           terraform_version: "1.8.0"
 
       - name: Terraform Init
-        run: terraform init -backend=false
+        run: terraform init 
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
