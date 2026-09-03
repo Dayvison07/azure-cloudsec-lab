@@ -9,7 +9,6 @@ on:
 permissions:
   id-token: write 
   contents: read
-  
 
 jobs:
   security-scan:
@@ -54,7 +53,7 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
- 
+
   terraform-apply:
     name: "Terraform Apply (OIDC)"
     needs: [security-scan, terraform-build] # Só provisiona se passar na segurança e sintaxe
@@ -63,6 +62,13 @@ jobs:
     defaults:
       run:
         working-directory: environments/dev
+    
+    # 🔹 Variáveis de ambiente injetadas para o Terraform ler o OIDC da Azure
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_USE_OIDC: true
 
     steps:
       - name: Checkout Code
@@ -85,5 +91,3 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-
-    
